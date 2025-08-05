@@ -19,7 +19,8 @@ class OutputFormatter:
                           text: str, 
                           audio_filename: str, 
                           api_used: str = "whisper",
-                          metadata: Dict = None) -> str:
+                          metadata: Dict = None,
+                          format_type: str = "standard") -> str:
         """
         文字起こし結果をファイルに保存
         
@@ -28,6 +29,7 @@ class OutputFormatter:
             audio_filename: 元の音声ファイル名
             api_used: 使用したAPI名
             metadata: メタデータ辞書
+            format_type: 出力形式 ("standard", "continuous", "minimal")
             
         Returns:
             保存されたファイルのパス
@@ -35,19 +37,27 @@ class OutputFormatter:
         # 出力ファイル名を生成
         base_name = os.path.splitext(os.path.basename(audio_filename))[0]
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_filename = f"{base_name}_{api_used}_{timestamp}.txt"
+        
+        # フォーマットタイプに応じたファイル名
+        format_suffix = f"_{format_type}" if format_type != "standard" else ""
+        output_filename = f"{base_name}_{api_used}{format_suffix}_{timestamp}.txt"
         output_path = os.path.join(self.output_dir, output_filename)
         
-        # ヘッダー情報を作成
-        header = self._create_header(audio_filename, api_used, metadata)
+        # フォーマットに応じて出力を生成
+        if format_type == "minimal":
+            # ヘッダーなしの最小限の出力
+            output_text = text
+        elif format_type == "continuous":
+            # 連続したテキスト形式（goodサンプルのような形式）
+            output_text = self._format_continuous_text(text, audio_filename, api_used, metadata)
+        else:
+            # 標準形式（タイムスタンプ付き）
+            header = self._create_header(audio_filename, api_used, metadata)
+            output_text = header + "\n" + "="*80 + "\n" + "文字起こし結果\n" + "="*80 + "\n\n" + text
         
         # ファイルに保存
         with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(header)
-            f.write("\n" + "="*80 + "\n")
-            f.write("文字起こし結果\n")
-            f.write("="*80 + "\n\n")
-            f.write(text)
+            f.write(output_text)
         
         print(f"文字起こし結果を保存しました: {output_path}")
         return output_path
@@ -121,3 +131,31 @@ class OutputFormatter:
         tail_lines = lines[-(max_lines//2):]
         
         return '\n'.join(head_lines) + f'\n\n... ({len(lines) - max_lines}行省略) ...\n\n' + '\n'.join(tail_lines)
+    
+    def _format_continuous_text(self, text: str, audio_filename: str, api_used: str, metadata: Dict = None) -> str:
+        """
+        連続テキスト形式で出力（goodサンプルのような形式）
+        
+        Args:
+            text: 文字起こしテキスト
+            audio_filename: 元の音声ファイル名
+            api_used: 使用したAPI名
+            metadata: メタデータ
+            
+        Returns:
+            整形されたテキスト
+        """
+        # タイムスタンプを除去して連続テキストにする
+        lines = text.split('\n')
+        continuous_text = ""
+        
+        for line in lines:
+            # タイムスタンプ形式の行を検出して除去
+            if line.startswith('[') and '] ' in line:
+                # タイムスタンプ部分を除去
+                text_part = line.split('] ', 1)[1] if '] ' in line else line
+                continuous_text += text_part
+            else:
+                continuous_text += line
+        
+        return continuous_text

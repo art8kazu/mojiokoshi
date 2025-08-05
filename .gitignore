@@ -47,6 +47,9 @@ venv.bak/
 # Project specific
 output/*
 !output/.gitkeep
+input/*
+!input/.gitkeep
+!input/README.md
 logs/*
 !logs/.gitkeep
 *.mp3
@@ -58,6 +61,13 @@ logs/*
 *.flac
 *.aac
 *.wma
+
+# 文字起こし結果ファイル
+*_whisper_*.txt
+*_deepseek_*.txt
+*_gemini_*.txt
+*_openai_*.txt
+*_comparison_*.txt
 
 # Whisper models cache
 models/

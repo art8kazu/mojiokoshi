@@ -19,12 +19,18 @@ def main():
     parser.add_argument("--llm", choices=["deepseek", "gemini", "openai"], 
                        default="whisper", help="使用するLLM API (デフォルト: whisper only)")
     parser.add_argument("--model", default="base", 
-                       choices=["tiny", "base", "small", "medium", "large"],
+                       choices=["tiny", "base", "small", "medium", "large", "large-v2", "large-v3"],
                        help="Whisperモデル (デフォルト: base)")
     parser.add_argument("--compare", action="store_true", 
                        help="複数APIで比較実行")
     parser.add_argument("--verbose", "-v", action="store_true", 
                        help="詳細ログ出力")
+    parser.add_argument("--format", choices=["standard", "continuous", "minimal"],
+                       default="standard", help="出力形式 (デフォルト: standard)")
+    parser.add_argument("--enable-vad", action="store_true",
+                       help="VAD (Voice Activity Detection) を有効化")
+    parser.add_argument("--prompt", type=str,
+                       help="Whisperに与える初期プロンプト（文脈を提供）")
     
     args = parser.parse_args()
     
@@ -50,28 +56,42 @@ def main():
         print("\n=== Whisper文字起こし開始 ===")
         start_time = time.time()
         
-        whisper_result = audio_processor.transcribe(args.audio_file)
-        timestamped_text = audio_processor.create_timestamped_text(whisper_result)
+        whisper_result = audio_processor.transcribe(
+            args.audio_file,
+            enable_vad=args.enable_vad,
+            prompt=args.prompt
+        )
+        
+        # 出力形式に応じてテキストを生成
+        if args.format == "continuous":
+            output_text = audio_processor.create_continuous_text(whisper_result, enable_timestamps=False)
+        elif args.format == "minimal":
+            output_text = audio_processor.create_continuous_text(whisper_result, enable_timestamps=True)
+        else:
+            output_text = audio_processor.create_timestamped_text(whisper_result)
         
         whisper_time = time.time() - start_time
         print(f"Whisper処理時間: {whisper_time:.2f}秒")
         
-        # Whisperのみの結果を保存
+        # 結果を保存
         metadata = {
             "whisper_model": args.model,
-            "processing_time": whisper_time
+            "processing_time": whisper_time,
+            "enable_vad": args.enable_vad,
+            "format": args.format
         }
         
         whisper_output_path = output_formatter.save_transcription(
-            timestamped_text, 
+            output_text, 
             args.audio_file, 
             "whisper",
-            metadata
+            metadata,
+            format_type=args.format
         )
         
         if args.verbose:
             print("\n=== Whisper結果プレビュー ===")
-            preview = output_formatter.format_for_display(timestamped_text, 10)
+            preview = output_formatter.format_for_display(output_text, 10)
             print(preview)
         
         print("\n=== 処理完了 ===")
