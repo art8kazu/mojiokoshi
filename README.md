@@ -14,24 +14,75 @@ OpenAI Whisper + LLM後処理による高精度な日本語会議文字起こし
 - ⏱️ **タイムスタンプ付き**: 正確なタイムスタンプ付きテキスト出力
 - 🔄 **バッチ処理**: 複数ファイルの一括処理対応
 
+## 📋 前提条件
+
+- Python 3.9以上
+- Git
+- 8GB以上のRAM（推奨）
+- インターネット接続（LLM API使用時）
+
+### 必要なAPIキー（任意）
+- OpenAI API Key（GPT-4o-mini使用時）
+- DeepSeek API Key（DeepSeek使用時）
+- Google AI Studio API Key（Gemini使用時）
+
 ## 🚀 クイックスタート
 
 ### 超簡単セットアップ
 
+**方法1: GitHubからクローン（推奨）**
+```bash
+# リポジトリをクローン
+git clone https://github.com/art8kazu/mojiokoshi.git
+cd mojiokoshi
+
+# セットアップスクリプトを実行
+# Mac/Linux:
+chmod +x setup.sh && ./setup.sh
+
+# Windows:
+setup.bat
+```
+
+**方法2: セットアップスクリプトのみダウンロード**
+
 **Mac/Linux:**
 ```bash
 # 1分でセットアップ完了
-curl -O https://raw.githubusercontent.com/yourusername/mojiokoshi/main/setup.sh
+curl -O https://raw.githubusercontent.com/art8kazu/mojiokoshi/main/setup.sh
 chmod +x setup.sh && ./setup.sh
 ```
 
 **Windows:**
 ```cmd
 REM setup.batをダウンロードして管理者権限で実行
+curl -O https://raw.githubusercontent.com/art8kazu/mojiokoshi/main/setup.bat
 setup.bat
 ```
 
 ### 手動インストール
+
+**手動インストール手順:**
+```bash
+# 1. リポジトリをクローン
+git clone https://github.com/art8kazu/mojiokoshi.git
+cd mojiokoshi
+
+# 2. Python仮想環境を作成（推奨）
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate   # Windows
+
+# 3. 依存関係をインストール
+pip install -r requirements.txt
+
+# 4. 環境変数を設定
+cp .env.example .env
+# .envファイルを編集してAPIキーを設定
+
+# 5. テスト実行
+python transcriber.py --help
+```
 
 詳細な手順は以下をご覧ください：
 - 📖 [詳細インストールガイド](docs/INSTALLATION.md)
@@ -217,6 +268,6 @@ MIT License - 詳細は[LEGAL.md](LEGAL.md)をご覧ください
 
 プルリクエスト歓迎です！詳細は[CONTRIBUTING.md](docs/CONTRIBUTING.md)をご覧ください。
 
-- バグ報告: [Issues](https://github.com/yourusername/mojiokoshi/issues)
-- 機能要望: [Issues](https://github.com/yourusername/mojiokoshi/issues)
-- 開発参加: [Pull Requests](https://github.com/yourusername/mojiokoshi/pulls)
+- バグ報告: [Issues](https://github.com/art8kazu/mojiokoshi/issues)
+- 機能要望: [Issues](https://github.com/art8kazu/mojiokoshi/issues)
+- 開発参加: [Pull Requests](https://github.com/art8kazu/mojiokoshi/pulls)
