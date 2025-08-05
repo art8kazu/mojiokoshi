@@ -1,0 +1,21 @@
+# 音声ファイル用ディレクトリ
+
+このディレクトリに文字起こししたい音声ファイルを配置してください。
+
+## 対応フォーマット
+- MP3
+- WAV  
+- M4A
+- FLAC
+- AAC
+- OGG
+- WMA
+
+## 使用例
+```bash
+# 単一ファイル
+python transcriber.py input/meeting.mp3
+
+# 複数ファイル  
+python transcriber.py input/*.mp3 --batch
+```
